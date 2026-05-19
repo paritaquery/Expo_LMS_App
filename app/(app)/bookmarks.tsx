@@ -1,3 +1,4 @@
+import { useMemo, useCallback } from 'react';
 import { Redirect, router } from 'expo-router';
 
 import { EmptyState } from '@/components/feedback';
@@ -16,9 +17,19 @@ export default function BookmarksScreen() {
     return <Redirect href="/login" />;
   }
 
-  const bookmarkIds = new Set(Object.keys(bookmarks));
-  const bookmarkedCourses =
-    courseCatalogQuery.data?.filter((course) => bookmarkIds.has(course.id)) ?? [];
+  const bookmarkIds = useMemo(() => new Set(Object.keys(bookmarks)), [bookmarks]);
+  const bookmarkedCourses = useMemo(
+    () => courseCatalogQuery.data?.filter((course) => bookmarkIds.has(course.id)) ?? [],
+    [courseCatalogQuery.data, bookmarkIds]
+  );
+
+  const handlePressCourse = useCallback((courseId: string) => {
+    router.push(`/(app)/course/${courseId}`);
+  }, []);
+
+  const handleRefresh = useCallback(() => {
+    void courseCatalogQuery.refetch();
+  }, [courseCatalogQuery]);
 
   return (
     <AppScreen
@@ -32,12 +43,8 @@ export default function BookmarksScreen() {
           bookmarkedCourseIds={bookmarkIds}
           courses={bookmarkedCourses}
           isRefreshing={courseCatalogQuery.isRefetching}
-          onPressCourse={(courseId) => {
-            router.push(`/(app)/course/${courseId}`);
-          }}
-          onRefresh={() => {
-            void courseCatalogQuery.refetch();
-          }}
+          onPressCourse={handlePressCourse}
+          onRefresh={handleRefresh}
           onToggleBookmark={toggleBookmark}
         />
       ) : (

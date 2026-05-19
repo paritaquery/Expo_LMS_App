@@ -3,4 +3,5 @@ export type UserPreferences = {
   reminderNotificationsEnabled: boolean;
   preferredTheme: 'light' | 'dark' | 'system';
   lastOpenedAt?: string;
+  profileImageUri?: string;
 };

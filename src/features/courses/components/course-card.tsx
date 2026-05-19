@@ -1,3 +1,4 @@
+import { memo } from 'react';
 import { Image } from 'expo-image';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
 
@@ -10,14 +11,19 @@ type CourseCardProps = {
   onPress?: (courseId: string) => void;
 };
 
-export function CourseCard({
+export const CourseCard = memo(function CourseCard({
   course,
   isBookmarked = false,
   onToggleBookmark,
   onPress,
 }: CourseCardProps) {
   return (
-    <Pressable onPress={() => onPress?.(course.id)} style={styles.card}>
+    <Pressable
+      accessibilityLabel={`Course: ${course.title} by ${course.instructorName}`}
+      accessibilityRole="button"
+      onPress={() => onPress?.(course.id)}
+      style={styles.card}
+    >
       <Image
         contentFit="cover"
         source={{ uri: course.thumbnailUrl }}
@@ -29,6 +35,9 @@ export function CourseCard({
             {course.title}
           </Text>
           <Pressable
+            accessibilityLabel={isBookmarked ? 'Remove bookmark' : 'Add bookmark'}
+            accessibilityRole="button"
+            hitSlop={14}
             onPress={() => onToggleBookmark?.(course.id)}
             style={({ pressed }) => [styles.bookmarkButton, pressed ? styles.pressed : null]}
           >
@@ -44,7 +53,7 @@ export function CourseCard({
       </View>
     </Pressable>
   );
-}
+});
 
 const styles = StyleSheet.create({
   card: {

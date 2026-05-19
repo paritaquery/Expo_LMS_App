@@ -51,6 +51,19 @@ export default function CourseLearningScreen() {
   }
 
   const html = useMemo(() => buildCourseWebviewHtml(course), [course]);
+  const nativePayload = useMemo(
+    () =>
+      JSON.stringify({
+        courseId: course.id,
+        title: course.title,
+        instructor: course.instructorName,
+      }),
+    [course.id, course.instructorName, course.title]
+  );
+  const injectedJavaScriptBeforeContentLoaded = useMemo(
+    () => `window.__NATIVE_PAYLOAD__ = ${nativePayload}; true;`,
+    [nativePayload]
+  );
 
   if (hasWebviewError) {
     return (
@@ -71,9 +84,17 @@ export default function CourseLearningScreen() {
   return (
     <View style={styles.container}>
       <WebView
+        injectedJavaScriptBeforeContentLoaded={injectedJavaScriptBeforeContentLoaded}
         onError={() => setHasWebviewError(true)}
         originWhitelist={['*']}
-        source={{ html }}
+        source={{
+          html,
+          headers: {
+            'X-Course-Id': course.id,
+            'X-Course-Title': course.title,
+            'X-Instructor-Name': course.instructorName,
+          },
+        }}
         startInLoadingState
       />
     </View>

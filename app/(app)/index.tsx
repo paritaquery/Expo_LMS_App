@@ -1,3 +1,4 @@
+import { useMemo, useCallback } from 'react';
 import { Alert } from 'react-native';
 import { Redirect, router } from 'expo-router';
 import { StyleSheet, View } from 'react-native';
@@ -14,7 +15,19 @@ export default function AppHomeScreen() {
   const isOnline = useAppStore((state) => state.isOnline);
   const toggleBookmark = useAppStore((state) => state.toggleBookmark);
   const courseCatalogQuery = useCourseCatalog();
-  const bookmarkedCourseIds = new Set(Object.keys(bookmarks));
+  const bookmarkedCourseIds = useMemo(() => new Set(Object.keys(bookmarks)), [bookmarks]);
+
+  const handlePressCourse = useCallback((courseId: string) => {
+    router.push(`/(app)/course/${courseId}`);
+  }, []);
+
+  const handleRefresh = useCallback(() => {
+    if (!isOnline) {
+      Alert.alert('Offline', 'Reconnect to refresh the course catalog.');
+      return;
+    }
+    void courseCatalogQuery.refetch();
+  }, [isOnline, courseCatalogQuery]);
 
   if (!session) {
     return <Redirect href="/login" />;
@@ -42,16 +55,8 @@ export default function AppHomeScreen() {
             bookmarkedCourseIds={bookmarkedCourseIds}
             courses={courseCatalogQuery.data}
             isRefreshing={courseCatalogQuery.isRefetching}
-            onPressCourse={(courseId) => {
-              router.push(`/(app)/course/${courseId}`);
-            }}
-            onRefresh={() => {
-              if (!isOnline) {
-                Alert.alert('Offline', 'Reconnect to refresh the course catalog.');
-                return;
-              }
-              void courseCatalogQuery.refetch();
-            }}
+            onPressCourse={handlePressCourse}
+            onRefresh={handleRefresh}
             onToggleBookmark={toggleBookmark}
           />
         </View>

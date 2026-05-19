@@ -2,7 +2,7 @@ import { Stack } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
 import { View } from 'react-native';
 
-import { OfflineBanner } from '@/components/feedback';
+import { AppErrorBoundary, OfflineBanner } from '@/components/feedback';
 import { AppProviders } from '@/providers';
 import { useAppStore } from '@/store';
 
@@ -24,6 +24,8 @@ function RootNavigator() {
     </View>
   );
 }
+
+export { AppErrorBoundary as ErrorBoundary };
 
 export default function RootLayout() {
   return (

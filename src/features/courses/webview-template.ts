@@ -63,6 +63,16 @@ export function buildCourseWebviewHtml(course: Course) {
         padding: 18px;
         margin-top: 12px;
       }
+      .payload {
+        margin-top: 16px;
+        border-radius: 12px;
+        background: #0f172a;
+        color: #e2e8f0;
+        padding: 12px;
+        font-size: 12px;
+        line-height: 1.6;
+        white-space: pre-wrap;
+      }
       h2 {
         margin: 0 0 10px;
         font-size: 18px;
@@ -100,7 +110,31 @@ export function buildCourseWebviewHtml(course: Course) {
           <li>Lesson 4: Project assignment and next steps</li>
         </ul>
       </section>
+
+      <section class="card">
+        <h2>Native Payload (Headers)</h2>
+        <div id="native-payload" class="payload">Waiting for native payload...</div>
+      </section>
     </main>
+    <script>
+      (function () {
+        try {
+          var payload = window.__NATIVE_PAYLOAD__ || null;
+          var node = document.getElementById('native-payload');
+          if (!node) return;
+          if (!payload) {
+            node.textContent = 'No native payload found.';
+            return;
+          }
+          node.textContent = JSON.stringify(payload, null, 2);
+        } catch (error) {
+          var fallback = document.getElementById('native-payload');
+          if (fallback) {
+            fallback.textContent = 'Payload read failed.';
+          }
+        }
+      })();
+    </script>
   </body>
 </html>`;
 }
