@@ -1,7 +1,7 @@
 {
   "expo": {
-    "name": "Expo",
-    "slug": "Expo",
+    "name": "Expo_LMS_App",
+    "slug": "expo-lms-app",
     "scheme": "mini-lms",
     "version": "1.0.0",
     "orientation": "portrait",
@@ -14,9 +14,11 @@
       "backgroundColor": "#ffffff"
     },
     "ios": {
-      "supportsTablet": true
+      "supportsTablet": true,
+      "bundleIdentifier": "com.paritaquery.minilms"
     },
     "android": {
+      "package": "com.paritaquery.minilms",
       "adaptiveIcon": {
         "foregroundImage": "./assets/adaptive-icon.png",
         "backgroundColor": "#ffffff"
@@ -29,10 +31,16 @@
     },
     "plugins": [
       "expo-router",
-      "expo-secure-store"
+      "expo-secure-store",
+      "expo-font"
     ],
     "extra": {
-      "apiBaseUrl": "https://api.freeapi.app"
-    }
+      "apiBaseUrl": "https://api.freeapi.app",
+      "router": {},
+      "eas": {
+        "projectId": "64dcb568-5ec6-4399-b033-105239b80271"
+      }
+    },
+    "owner": "parita_panchani"
   }
 }
