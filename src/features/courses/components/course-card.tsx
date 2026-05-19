@@ -1,6 +1,6 @@
 import { memo } from 'react';
-import { Image } from 'expo-image';
-import { Pressable, StyleSheet, Text, View } from 'react-native';
+import { Image, Pressable, StyleSheet, Text, View } from 'react-native';
+import { Ionicons } from '@expo/vector-icons';
 
 import type { Course } from '@/types/course';
 
@@ -25,7 +25,7 @@ export const CourseCard = memo(function CourseCard({
       style={styles.card}
     >
       <Image
-        contentFit="cover"
+        resizeMode="cover"
         source={{ uri: course.thumbnailUrl }}
         style={styles.thumbnail}
       />
@@ -41,7 +41,11 @@ export const CourseCard = memo(function CourseCard({
             onPress={() => onToggleBookmark?.(course.id)}
             style={({ pressed }) => [styles.bookmarkButton, pressed ? styles.pressed : null]}
           >
-            <Text style={styles.bookmarkIcon}>{isBookmarked ? '★' : '☆'}</Text>
+            <Ionicons
+              color={isBookmarked ? '#f59e0b' : '#94a3b8'}
+              name={isBookmarked ? 'bookmark' : 'bookmark-outline'}
+              size={18}
+            />
           </Pressable>
         </View>
         <Text numberOfLines={2} style={styles.description}>
@@ -57,56 +61,65 @@ export const CourseCard = memo(function CourseCard({
 
 const styles = StyleSheet.create({
   card: {
-    borderWidth: 1,
-    borderColor: '#e2e8f0',
-    borderRadius: 16,
+    borderRadius: 20,
     backgroundColor: '#ffffff',
     overflow: 'hidden',
+    marginBottom: 20,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 6 },
+    shadowOpacity: 0.08,
+    shadowRadius: 16,
+    elevation: 4,
+    borderWidth: 1,
+    borderColor: 'rgba(226, 232, 240, 0.5)',
   },
   thumbnail: {
     width: '100%',
-    height: 130,
+    height: 180,
     backgroundColor: '#e2e8f0',
   },
   content: {
-    padding: 12,
+    padding: 16,
   },
   headerRow: {
     flexDirection: 'row',
-    alignItems: 'center',
-    gap: 8,
+    alignItems: 'flex-start',
+    justifyContent: 'space-between',
+    gap: 12,
   },
   title: {
     flex: 1,
-    fontSize: 15,
-    fontWeight: '700',
+    fontSize: 17,
+    fontWeight: '800',
     color: '#0f172a',
+    lineHeight: 24,
   },
   description: {
-    marginTop: 6,
-    fontSize: 13,
-    lineHeight: 20,
+    marginTop: 8,
+    fontSize: 14,
+    lineHeight: 22,
     color: '#475569',
   },
   instructor: {
-    marginTop: 10,
+    marginTop: 12,
     fontSize: 13,
-    fontWeight: '600',
-    color: '#334155',
+    fontWeight: '700',
+    color: '#2563eb',
+    textTransform: 'uppercase',
+    letterSpacing: 0.5,
   },
   bookmarkButton: {
-    width: 30,
-    height: 30,
-    borderRadius: 15,
+    width: 36,
+    height: 36,
+    borderRadius: 18,
     alignItems: 'center',
     justifyContent: 'center',
-    backgroundColor: '#f1f5f9',
-  },
-  bookmarkIcon: {
-    fontSize: 16,
-    color: '#0f172a',
+    backgroundColor: '#f8fafc',
+    borderWidth: 1,
+    borderColor: '#e2e8f0',
   },
   pressed: {
-    opacity: 0.7,
+    opacity: 0.6,
+    transform: [{ scale: 0.95 }],
   },
 });

@@ -1,11 +1,10 @@
 import { useEffect, useState } from 'react';
-import { Alert, Pressable, StyleSheet, Text } from 'react-native';
+import { Alert, Pressable, ScrollView, StyleSheet, Switch, Text, View } from 'react-native';
 import { useQueryClient } from '@tanstack/react-query';
 import { Image } from 'expo-image';
 import * as ImagePicker from 'expo-image-picker';
+import { Ionicons } from '@expo/vector-icons';
 
-import { InfoBanner } from '@/components/feedback';
-import { AppScreen } from '@/components/layout/app-screen';
 import { useCourseCatalog } from '@/features/courses/hooks';
 import { appStorage, secureStorage } from '@/services/storage';
 import { useAppStore, useAuthStore } from '@/store';
@@ -127,194 +126,336 @@ export default function ProfileScreen() {
   };
 
   return (
-    <AppScreen
-      eyebrow="Account"
-      title="Profile"
-      description={session ? `Signed in as ${session.email}` : 'Learner account'}
-    >
-      <Pressable onPress={handleProfileImagePick} style={styles.avatarWrap}>
-        {profileImageUri ? (
-          <Image contentFit="cover" source={{ uri: profileImageUri }} style={styles.avatar} />
-        ) : (
-          <Text style={styles.avatarPlaceholder}>Add Photo</Text>
-        )}
-      </Pressable>
-      {profileImageUri ? (
-        <Pressable onPress={handleProfileImageRemove} style={styles.removePhotoButton}>
-          <Text style={styles.removePhotoText}>Remove photo</Text>
-        </Pressable>
-      ) : null}
-      <InfoBanner
-        title="Learner Stats"
-        description={`Enrolled: ${enrolledCourseIds.length}  |  Bookmarked: ${Object.keys(bookmarks).length}  |  Catalog: ${courseCatalogQuery.data?.length ?? 0}`}
-        tone="info"
-      />
-      <Text style={styles.sectionTitle}>Progress Snapshot</Text>
-      <Text style={styles.sectionBody}>
-        {enrolledCourseIds.length > 0
-          ? 'Great momentum. Keep going through enrolled courses and track consistency.'
-          : 'You have not enrolled yet. Open any course details and tap Enroll Now to start tracking progress.'}
-      </Text>
-      <Text style={styles.sectionTitle}>Preferences</Text>
-      <Pressable onPress={handleToggleNotifications} style={styles.prefButton}>
-        <Text style={styles.prefLabel}>Notifications</Text>
-        <Text style={styles.prefValue}>
-          {preferences?.notificationsEnabled ? 'On' : 'Off'}
-        </Text>
-      </Pressable>
-      <Pressable onPress={handleToggleReminders} style={styles.prefButton}>
-        <Text style={styles.prefLabel}>24h Reminder</Text>
-        <Text style={styles.prefValue}>
-          {preferences?.reminderNotificationsEnabled ? 'On' : 'Off'}
-        </Text>
-      </Pressable>
-      <Text style={styles.themeTitle}>Theme Preference</Text>
-      <Pressable
-        onPress={() => handleThemeChange('light')}
-        style={[
-          styles.themeButton,
-          preferences?.preferredTheme === 'light' ? styles.themeButtonActive : null,
-        ]}
-      >
-        <Text style={styles.themeButtonText}>Light</Text>
-      </Pressable>
-      <Pressable
-        onPress={() => handleThemeChange('dark')}
-        style={[
-          styles.themeButton,
-          preferences?.preferredTheme === 'dark' ? styles.themeButtonActive : null,
-        ]}
-      >
-        <Text style={styles.themeButtonText}>Dark</Text>
-      </Pressable>
-      <Pressable
-        onPress={() => handleThemeChange('system')}
-        style={[
-          styles.themeButton,
-          preferences?.preferredTheme === 'system' ? styles.themeButtonActive : null,
-        ]}
-      >
-        <Text style={styles.themeButtonText}>System</Text>
-      </Pressable>
+    <ScrollView contentContainerStyle={styles.container} style={styles.scroll}>
+      <View style={styles.header}>
+        <View style={styles.avatarContainer}>
+          <Pressable onPress={handleProfileImagePick} style={styles.avatarWrap}>
+            {profileImageUri ? (
+              <Image contentFit="cover" source={{ uri: profileImageUri }} style={styles.avatar} />
+            ) : (
+              <View style={styles.avatarPlaceholder}>
+                <Ionicons color="#94a3b8" name="person" size={40} />
+              </View>
+            )}
+            <View style={styles.editBadge}>
+              <Ionicons color="#ffffff" name="camera" size={14} />
+            </View>
+          </Pressable>
+          <Text style={styles.userName}>{session ? session.email : 'Learner'}</Text>
+          <Text style={styles.userRole}>Premium Member</Text>
+        </View>
+      </View>
+
+      <View style={styles.statsRow}>
+        <View style={styles.statCard}>
+          <Text style={styles.statNumber}>{enrolledCourseIds.length}</Text>
+          <Text style={styles.statLabel}>Enrolled</Text>
+        </View>
+        <View style={styles.statCard}>
+          <Text style={styles.statNumber}>{Object.keys(bookmarks).length}</Text>
+          <Text style={styles.statLabel}>Saved</Text>
+        </View>
+        <View style={styles.statCard}>
+          <Text style={styles.statNumber}>{courseCatalogQuery.data?.length ?? 0}</Text>
+          <Text style={styles.statLabel}>Available</Text>
+        </View>
+      </View>
+
+      <View style={styles.section}>
+        <Text style={styles.sectionTitle}>App Preferences</Text>
+        <View style={styles.prefGroup}>
+          <View style={styles.prefRow}>
+            <View style={styles.prefIconWrap}>
+              <Ionicons color="#2563eb" name="notifications" size={18} />
+            </View>
+            <Text style={styles.prefLabel}>Push Notifications</Text>
+            <Switch
+              onValueChange={handleToggleNotifications}
+              thumbColor={preferences?.notificationsEnabled ? '#ffffff' : '#f4f3f4'}
+              trackColor={{ false: '#cbd5e1', true: '#2563eb' }}
+              value={Boolean(preferences?.notificationsEnabled)}
+            />
+          </View>
+
+          <View style={styles.divider} />
+
+          <View style={styles.prefRow}>
+            <View style={styles.prefIconWrap}>
+              <Ionicons color="#2563eb" name="alarm" size={18} />
+            </View>
+            <Text style={styles.prefLabel}>24h Reminder</Text>
+            <Switch
+              onValueChange={handleToggleReminders}
+              thumbColor={preferences?.reminderNotificationsEnabled ? '#ffffff' : '#f4f3f4'}
+              trackColor={{ false: '#cbd5e1', true: '#2563eb' }}
+              value={Boolean(preferences?.reminderNotificationsEnabled)}
+            />
+          </View>
+        </View>
+      </View>
+
+      <View style={styles.section}>
+        <Text style={styles.sectionTitle}>Appearance</Text>
+        <View style={styles.themeGroup}>
+          {(['light', 'dark', 'system'] as const).map((theme) => (
+            <Pressable
+              key={theme}
+              onPress={() => handleThemeChange(theme)}
+              style={[
+                styles.themeButton,
+                preferences?.preferredTheme === theme && styles.themeButtonActive,
+              ]}
+            >
+              <Text
+                style={[
+                  styles.themeButtonText,
+                  preferences?.preferredTheme === theme && styles.themeButtonTextActive,
+                ]}
+              >
+                {theme.charAt(0).toUpperCase() + theme.slice(1)}
+              </Text>
+            </Pressable>
+          ))}
+        </View>
+      </View>
+
       <Pressable
         accessibilityRole="button"
         disabled={isLoggingOut}
         onPress={handleLogout}
         style={({ pressed }) => [
           styles.logoutButton,
-          pressed ? styles.logoutButtonPressed : null,
-          isLoggingOut ? styles.logoutButtonDisabled : null,
+          pressed && styles.logoutButtonPressed,
+          isLoggingOut && styles.logoutButtonDisabled,
         ]}
       >
+        <Ionicons color="#ef4444" name="log-out-outline" size={20} style={styles.logoutIcon} />
         <Text style={styles.logoutButtonText}>
-          {isLoggingOut ? 'Logging out...' : 'Log out'}
+          {isLoggingOut ? 'Logging out...' : 'Sign Out'}
         </Text>
       </Pressable>
-    </AppScreen>
+
+      <Text style={styles.versionText}>Version 1.0.0</Text>
+    </ScrollView>
   );
 }
 
 const styles = StyleSheet.create({
+  scroll: {
+    flex: 1,
+    backgroundColor: '#f8fafc',
+  },
+  container: {
+    padding: 24,
+    paddingBottom: 40,
+    gap: 28,
+  },
+  header: {
+    alignItems: 'center',
+    marginTop: 10,
+  },
+  avatarContainer: {
+    alignItems: 'center',
+  },
   avatarWrap: {
-    width: 92,
-    height: 92,
-    borderRadius: 46,
-    alignSelf: 'center',
-    overflow: 'hidden',
+    width: 100,
+    height: 100,
+    borderRadius: 50,
     backgroundColor: '#e2e8f0',
     alignItems: 'center',
     justifyContent: 'center',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.1,
+    shadowRadius: 12,
+    elevation: 4,
+    marginBottom: 16,
   },
   avatar: {
     width: '100%',
     height: '100%',
+    borderRadius: 50,
   },
   avatarPlaceholder: {
-    fontSize: 13,
-    fontWeight: '700',
-    color: '#334155',
+    width: '100%',
+    height: '100%',
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: '#f1f5f9',
+    borderRadius: 50,
   },
-  removePhotoButton: {
-    alignSelf: 'center',
-    marginTop: -4,
+  editBadge: {
+    position: 'absolute',
+    bottom: 0,
+    right: 0,
+    backgroundColor: '#2563eb',
+    width: 30,
+    height: 30,
+    borderRadius: 15,
+    alignItems: 'center',
+    justifyContent: 'center',
+    borderWidth: 3,
+    borderColor: '#f8fafc',
   },
-  removePhotoText: {
-    fontSize: 13,
-    fontWeight: '600',
-    color: '#2563eb',
-  },
-  sectionTitle: {
-    fontSize: 16,
-    fontWeight: '700',
+  userName: {
+    fontSize: 22,
+    fontWeight: '800',
     color: '#0f172a',
+    marginBottom: 4,
   },
-  sectionBody: {
-    marginTop: -4,
+  userRole: {
     fontSize: 14,
-    lineHeight: 22,
-    color: '#475569',
+    color: '#64748b',
+    fontWeight: '500',
   },
-  prefButton: {
-    minHeight: 48,
-    borderRadius: 12,
+  statsRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    gap: 12,
+  },
+  statCard: {
+    flex: 1,
+    backgroundColor: '#ffffff',
+    borderRadius: 16,
+    paddingVertical: 16,
+    alignItems: 'center',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.05,
+    shadowRadius: 8,
+    elevation: 2,
     borderWidth: 1,
     borderColor: '#e2e8f0',
+  },
+  statNumber: {
+    fontSize: 24,
+    fontWeight: '800',
+    color: '#2563eb',
+    marginBottom: 4,
+  },
+  statLabel: {
+    fontSize: 13,
+    color: '#64748b',
+    fontWeight: '600',
+  },
+  section: {
+    gap: 12,
+  },
+  sectionTitle: {
+    fontSize: 13,
+    fontWeight: '700',
+    color: '#64748b',
+    textTransform: 'uppercase',
+    letterSpacing: 0.5,
+    marginLeft: 4,
+  },
+  prefGroup: {
     backgroundColor: '#ffffff',
-    paddingHorizontal: 14,
+    borderRadius: 16,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.04,
+    shadowRadius: 8,
+    elevation: 2,
+    borderWidth: 1,
+    borderColor: '#e2e8f0',
+    overflow: 'hidden',
+  },
+  prefRow: {
     flexDirection: 'row',
     alignItems: 'center',
-    justifyContent: 'space-between',
+    padding: 16,
+  },
+  prefIconWrap: {
+    width: 32,
+    height: 32,
+    borderRadius: 8,
+    backgroundColor: '#eff6ff',
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginRight: 12,
   },
   prefLabel: {
-    fontSize: 14,
+    flex: 1,
+    fontSize: 15,
     fontWeight: '600',
     color: '#0f172a',
   },
   prefValue: {
-    fontSize: 13,
-    fontWeight: '700',
-    color: '#2563eb',
-  },
-  themeTitle: {
-    marginTop: 4,
     fontSize: 14,
     fontWeight: '600',
-    color: '#334155',
+    color: '#94a3b8',
+    marginRight: 8,
+  },
+  divider: {
+    height: 1,
+    backgroundColor: '#f1f5f9',
+    marginLeft: 60,
+  },
+  themeGroup: {
+    flexDirection: 'row',
+    backgroundColor: '#ffffff',
+    borderRadius: 16,
+    padding: 6,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.04,
+    shadowRadius: 8,
+    elevation: 2,
+    borderWidth: 1,
+    borderColor: '#e2e8f0',
   },
   themeButton: {
-    minHeight: 42,
-    borderRadius: 10,
-    borderWidth: 1,
-    borderColor: '#dbe1ea',
-    backgroundColor: '#ffffff',
+    flex: 1,
+    paddingVertical: 10,
     alignItems: 'center',
-    justifyContent: 'center',
+    borderRadius: 12,
   },
   themeButtonActive: {
-    borderColor: '#2563eb',
-    backgroundColor: '#eff6ff',
+    backgroundColor: '#2563eb',
+    shadowColor: '#2563eb',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.2,
+    shadowRadius: 8,
+    elevation: 4,
   },
   themeButtonText: {
-    fontSize: 13,
+    fontSize: 14,
     fontWeight: '600',
-    color: '#1e293b',
+    color: '#64748b',
+  },
+  themeButtonTextActive: {
+    color: '#ffffff',
   },
   logoutButton: {
-    minHeight: 52,
-    borderRadius: 16,
+    flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
-    backgroundColor: '#0f172a',
+    backgroundColor: '#fef2f2',
+    padding: 16,
+    borderRadius: 16,
+    marginTop: 8,
+    borderWidth: 1,
+    borderColor: '#fee2e2',
   },
   logoutButtonPressed: {
-    opacity: 0.92,
+    opacity: 0.8,
   },
   logoutButtonDisabled: {
-    opacity: 0.6,
+    opacity: 0.5,
+  },
+  logoutIcon: {
+    marginRight: 8,
   },
   logoutButtonText: {
     fontSize: 15,
     fontWeight: '700',
-    color: '#ffffff',
+    color: '#ef4444',
+  },
+  versionText: {
+    textAlign: 'center',
+    fontSize: 13,
+    color: '#cbd5e1',
+    marginTop: 16,
   },
 });

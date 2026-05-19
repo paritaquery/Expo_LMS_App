@@ -93,6 +93,67 @@ function mapProducts(response: RandomProductsResponse): RawPublicProduct[] {
   return mapped;
 }
 
+import { ENV } from '@/config/env';
+
+function hashCode(str: string): number {
+  let hash = 0;
+  for (let i = 0; i < str.length; i++) {
+    hash = (hash << 5) - hash + str.charCodeAt(i);
+    hash |= 0;
+  }
+  return hash;
+}
+
+function getCategoryPlaceholder(category: string | undefined, id: string): string {
+  const cat = (category ?? '').toLowerCase();
+  
+  if (cat.includes('smartphones') || cat.includes('phone') || cat.includes('mobile')) {
+    return 'https://images.unsplash.com/photo-1511707171634-5f897ff02aa9?w=600&auto=format&fit=crop&q=80';
+  }
+  if (cat.includes('laptop') || cat.includes('computer') || cat.includes('notebook') || cat.includes('laptops')) {
+    return 'https://images.unsplash.com/photo-1496181130204-7552cc1454b4?w=600&auto=format&fit=crop&q=80';
+  }
+  if (cat.includes('fragrance') || cat.includes('beauty') || cat.includes('skincare')) {
+    return 'https://images.unsplash.com/photo-1556228720-195a672e8a03?w=600&auto=format&fit=crop&q=80';
+  }
+  if (cat.includes('grocer') || cat.includes('food')) {
+    return 'https://images.unsplash.com/photo-1542838132-92c53300491e?w=600&auto=format&fit=crop&q=80';
+  }
+  if (cat.includes('decor') || cat.includes('furniture') || cat.includes('home')) {
+    return 'https://images.unsplash.com/photo-1513694203232-719a280e022f?w=600&auto=format&fit=crop&q=80';
+  }
+  
+  const fallbacks = [
+    'https://images.unsplash.com/photo-1516321318423-f06f85e504b3?w=600&auto=format&fit=crop&q=80',
+    'https://images.unsplash.com/photo-1522202176988-66273c2fd55f?w=600&auto=format&fit=crop&q=80',
+    'https://images.unsplash.com/photo-1434030216411-0b793f4b4173?w=600&auto=format&fit=crop&q=80',
+    'https://images.unsplash.com/photo-1501504905252-473c47e087f8?w=600&auto=format&fit=crop&q=80',
+    'https://images.unsplash.com/photo-1427504494785-3a9ca7044f45?w=600&auto=format&fit=crop&q=80',
+  ];
+  
+  const index = Math.abs(hashCode(id)) % fallbacks.length;
+  return fallbacks[index];
+}
+
+function normalizeImageUrl(url: string | undefined, category: string | undefined, id: string): string {
+  if (!url || url.includes('dummyjson.com')) {
+    return getCategoryPlaceholder(category, id);
+  }
+
+  // Handle relative paths
+  if (url.startsWith('/')) {
+    return `${ENV.apiBaseUrl}${url}`;
+  }
+
+  // Replace localhost or 127.0.0.1 references with the public base URL
+  if (url.startsWith('http://localhost:') || url.startsWith('http://127.0.0.1:')) {
+    const path = url.replace(/^http:\/\/(localhost|127\.0\.0\.1):\d+/, '');
+    return `${ENV.apiBaseUrl}${path}`;
+  }
+
+  return url;
+}
+
 function toCourseViewModels(users: PublicUser[], products: RawPublicProduct[]): Course[] {
   return products.map((product, index) => {
     const instructor = users[index % Math.max(users.length, 1)];
@@ -101,9 +162,7 @@ function toCourseViewModels(users: PublicUser[], products: RawPublicProduct[]): 
       id: product.id,
       title: product.title,
       description: product.description,
-      thumbnailUrl:
-        product.images[0] ??
-        'https://images.unsplash.com/photo-1454165804606-c3d57bc86b40?w=1200',
+      thumbnailUrl: normalizeImageUrl(product.images[0], product.category, product.id),
       instructorName: instructor?.fullName ?? 'Mini LMS Instructor',
       category: product.category,
       price: product.price,

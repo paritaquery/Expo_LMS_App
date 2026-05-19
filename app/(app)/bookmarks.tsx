@@ -1,8 +1,8 @@
 import { useMemo, useCallback } from 'react';
 import { Redirect, router } from 'expo-router';
+import { StyleSheet, View } from 'react-native';
 
 import { EmptyState } from '@/components/feedback';
-import { AppScreen } from '@/components/layout/app-screen';
 import { CourseCatalogList } from '@/features/courses/components';
 import { useCourseCatalog } from '@/features/courses/hooks';
 import { useAppStore, useAuthStore } from '@/store';
@@ -32,27 +32,37 @@ export default function BookmarksScreen() {
   }, [courseCatalogQuery]);
 
   return (
-    <AppScreen
-      eyebrow="Library"
-      title="Bookmarks"
-      description="Your saved courses will be listed here for quick access."
-      scrollEnabled={false}
-    >
+    <View style={styles.container}>
       {bookmarkedCourses.length > 0 ? (
         <CourseCatalogList
           bookmarkedCourseIds={bookmarkIds}
           courses={bookmarkedCourses}
+          headerMetaSuffix="saved courses"
+          headerTitle="Your Bookmarks"
           isRefreshing={courseCatalogQuery.isRefetching}
           onPressCourse={handlePressCourse}
           onRefresh={handleRefresh}
           onToggleBookmark={toggleBookmark}
         />
       ) : (
-        <EmptyState
-          title="No bookmarks yet"
-          description="Browse courses from Home and tap the star icon to save courses here."
-        />
+        <View style={styles.emptyWrap}>
+          <EmptyState
+            description="Browse courses from Home and tap the star icon to save courses here."
+            title="No bookmarks yet"
+          />
+        </View>
       )}
-    </AppScreen>
+    </View>
   );
 }
+
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    backgroundColor: '#f8fafc',
+  },
+  emptyWrap: {
+    padding: 24,
+    marginTop: 24,
+  },
+});

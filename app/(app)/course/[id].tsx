@@ -1,6 +1,6 @@
-import { Image } from 'expo-image';
 import { Redirect, router, useLocalSearchParams } from 'expo-router';
-import { Alert, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { Alert, Image, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { Ionicons } from '@expo/vector-icons';
 
 import { EmptyState, ScreenLoader } from '@/components/feedback';
 import { useCourseCatalog } from '@/features/courses/hooks';
@@ -57,64 +57,99 @@ export default function CourseDetailsScreen() {
 
   return (
     <ScrollView contentContainerStyle={styles.contentContainer} style={styles.container}>
-      <Image contentFit="cover" source={{ uri: course.thumbnailUrl }} style={styles.hero} />
-      <Text style={styles.title}>{course.title}</Text>
-      <Text style={styles.instructor}>Instructor: {course.instructorName}</Text>
-      {course.category ? <Text style={styles.meta}>Category: {course.category}</Text> : null}
-      {typeof course.rating === 'number' ? (
-        <Text style={styles.meta}>Rating: {course.rating.toFixed(1)}</Text>
-      ) : null}
-      {typeof course.price === 'number' ? (
-        <Text style={styles.meta}>Price: ${course.price}</Text>
-      ) : null}
+      <View style={styles.imageWrap}>
+        <Image resizeMode="cover" source={{ uri: course.thumbnailUrl }} style={styles.hero} />
+        {typeof course.price === 'number' ? (
+          <View style={styles.priceBadge}>
+            <Text style={styles.priceText}>${course.price}</Text>
+          </View>
+        ) : null}
+      </View>
+
+      <View style={styles.headerInfo}>
+        <Text style={styles.title}>{course.title}</Text>
+        <View style={styles.instructorRow}>
+          <Ionicons color="#64748b" name="person-circle-outline" size={20} />
+          <Text style={styles.instructor}>{course.instructorName}</Text>
+        </View>
+      </View>
+
+      <View style={styles.metaRow}>
+        {course.category ? (
+          <View style={styles.metaPill}>
+            <Ionicons color="#475569" name="folder-outline" size={16} />
+            <Text style={styles.metaPillText}>{course.category}</Text>
+          </View>
+        ) : null}
+        {typeof course.rating === 'number' ? (
+          <View style={styles.metaPill}>
+            <Ionicons color="#f59e0b" name="star" size={16} />
+            <Text style={styles.metaPillText}>{course.rating.toFixed(1)}</Text>
+          </View>
+        ) : null}
+      </View>
+
       <View style={styles.actions}>
-        <Pressable
-          onPress={() => toggleBookmark(course.id)}
-          style={({ pressed }) => [
-            styles.secondaryButton,
-            pressed ? styles.buttonPressed : null,
-          ]}
-        >
-          <Text style={styles.secondaryButtonText}>
-            {isBookmarked ? 'Remove Bookmark' : 'Save Bookmark'}
-          </Text>
-        </Pressable>
         <Pressable
           onPress={() => {
             if (!isOnline) {
               Alert.alert('Offline', 'Reconnect to enroll in this course.');
               return;
             }
-
             toggleEnrollment(course.id);
           }}
           style={({ pressed }) => [
             styles.primaryButton,
-            pressed ? styles.buttonPressed : null,
+            isEnrolled && styles.primaryButtonEnrolled,
+            pressed && styles.buttonPressed,
           ]}
         >
+          <Ionicons color="#ffffff" name={isEnrolled ? 'checkmark-circle' : 'play-circle'} size={20} />
           <Text style={styles.primaryButtonText}>
             {isEnrolled ? 'Enrolled' : 'Enroll Now'}
           </Text>
         </Pressable>
+
+        <Pressable
+          onPress={() => toggleBookmark(course.id)}
+          style={({ pressed }) => [
+            styles.bookmarkButton,
+            isBookmarked && styles.bookmarkButtonActive,
+            pressed && styles.buttonPressed,
+          ]}
+        >
+          <Ionicons
+            color={isBookmarked ? '#f59e0b' : '#64748b'}
+            name={isBookmarked ? 'bookmark' : 'bookmark-outline'}
+            size={24}
+          />
+        </Pressable>
       </View>
-      <Pressable
-        onPress={() => router.push(`/(app)/course/${course.id}/learn`)}
-        style={({ pressed }) => [
-          styles.learnButton,
-          pressed ? styles.buttonPressed : null,
-        ]}
-      >
-        <Text style={styles.learnButtonText}>Open Learning View</Text>
-      </Pressable>
-      <Text style={styles.statusNote}>
-        {isEnrolled
-          ? 'You are enrolled in this course. Your enrollment is saved on this device.'
-          : isOnline
+
+      {isEnrolled ? (
+        <Pressable
+          onPress={() => router.push(`/(app)/course/${course.id}/learn`)}
+          style={({ pressed }) => [styles.learnButton, pressed && styles.buttonPressed]}
+        >
+          <Ionicons color="#ffffff" name="book-outline" size={20} style={styles.learnIcon} />
+          <Text style={styles.learnButtonText}>Open Learning View</Text>
+        </Pressable>
+      ) : null}
+
+      {!isEnrolled && (
+        <Text style={styles.statusNote}>
+          {isOnline
             ? 'Enroll to save this course in your local learner progress.'
             : 'You are offline. Enrollment is disabled until your connection returns.'}
-      </Text>
-      <Text style={styles.description}>{course.description}</Text>
+        </Text>
+      )}
+
+      <View style={styles.divider} />
+
+      <View style={styles.section}>
+        <Text style={styles.sectionTitle}>About this course</Text>
+        <Text style={styles.description}>{course.description}</Text>
+      </View>
     </ScrollView>
   );
 }
@@ -122,11 +157,11 @@ export default function CourseDetailsScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#f8fafc',
+    backgroundColor: '#ffffff',
   },
   contentContainer: {
-    padding: 20,
-    gap: 12,
+    padding: 24,
+    paddingBottom: 40,
   },
   centerWrap: {
     flex: 1,
@@ -134,84 +169,159 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     backgroundColor: '#f8fafc',
   },
+  imageWrap: {
+    shadowColor: '#000',
+    shadowOpacity: 0.12,
+    shadowRadius: 16,
+    shadowOffset: { width: 0, height: 8 },
+    elevation: 6,
+    marginBottom: 24,
+  },
   hero: {
     width: '100%',
-    height: 220,
-    borderRadius: 18,
+    height: 240,
+    borderRadius: 24,
     backgroundColor: '#e2e8f0',
+  },
+  priceBadge: {
+    position: 'absolute',
+    top: 16,
+    right: 16,
+    backgroundColor: 'rgba(15, 23, 42, 0.85)',
+    paddingHorizontal: 12,
+    paddingVertical: 6,
+    borderRadius: 12,
+  },
+  priceText: {
+    color: '#ffffff',
+    fontWeight: '800',
+    fontSize: 16,
+  },
+  headerInfo: {
+    marginBottom: 16,
   },
   title: {
     fontSize: 28,
     lineHeight: 34,
     fontWeight: '800',
     color: '#0f172a',
+    marginBottom: 8,
+  },
+  instructorRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
   },
   instructor: {
     fontSize: 15,
     fontWeight: '600',
-    color: '#334155',
+    color: '#64748b',
   },
-  meta: {
-    fontSize: 14,
+  metaRow: {
+    flexDirection: 'row',
+    gap: 12,
+    marginBottom: 28,
+  },
+  metaPill: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: '#f1f5f9',
+    paddingHorizontal: 12,
+    paddingVertical: 6,
+    borderRadius: 8,
+    gap: 6,
+  },
+  metaPillText: {
+    fontSize: 13,
+    fontWeight: '600',
     color: '#475569',
   },
-  description: {
-    marginTop: 8,
-    fontSize: 15,
-    lineHeight: 24,
-    color: '#1e293b',
-  },
   actions: {
-    marginTop: 8,
     flexDirection: 'row',
-    gap: 10,
+    gap: 12,
+    marginBottom: 16,
   },
   primaryButton: {
     flex: 1,
-    minHeight: 48,
-    borderRadius: 14,
+    height: 56,
+    borderRadius: 16,
+    flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
-    backgroundColor: '#0f172a',
+    backgroundColor: '#2563eb',
+    shadowColor: '#2563eb',
+    shadowOpacity: 0.3,
+    shadowRadius: 12,
+    shadowOffset: { width: 0, height: 6 },
+    elevation: 6,
+    gap: 8,
+  },
+  primaryButtonEnrolled: {
+    backgroundColor: '#10b981',
+    shadowColor: '#10b981',
   },
   primaryButtonText: {
-    fontSize: 14,
+    fontSize: 16,
     fontWeight: '700',
     color: '#ffffff',
   },
-  secondaryButton: {
-    flex: 1,
-    minHeight: 48,
-    borderRadius: 14,
+  bookmarkButton: {
+    width: 56,
+    height: 56,
+    borderRadius: 16,
     alignItems: 'center',
     justifyContent: 'center',
+    backgroundColor: '#f8fafc',
     borderWidth: 1,
-    borderColor: '#cbd5e1',
-    backgroundColor: '#ffffff',
+    borderColor: '#e2e8f0',
   },
-  secondaryButtonText: {
-    fontSize: 14,
-    fontWeight: '600',
-    color: '#0f172a',
+  bookmarkButtonActive: {
+    backgroundColor: '#fef3c7',
+    borderColor: '#fde68a',
   },
   buttonPressed: {
-    opacity: 0.85,
+    opacity: 0.8,
+    transform: [{ scale: 0.97 }],
+  },
+  learnButton: {
+    height: 56,
+    borderRadius: 16,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: '#0f172a',
+    marginBottom: 8,
+  },
+  learnIcon: {
+    marginRight: 8,
+  },
+  learnButtonText: {
+    fontSize: 15,
+    fontWeight: '700',
+    color: '#ffffff',
   },
   statusNote: {
     fontSize: 13,
     lineHeight: 20,
     color: '#475569',
+    textAlign: 'center',
+    marginTop: 8,
   },
-  learnButton: {
-    minHeight: 46,
-    borderRadius: 12,
-    alignItems: 'center',
-    justifyContent: 'center',
-    backgroundColor: '#1d4ed8',
+  divider: {
+    height: 1,
+    backgroundColor: '#f1f5f9',
+    marginVertical: 24,
   },
-  learnButtonText: {
-    fontSize: 14,
-    fontWeight: '700',
-    color: '#ffffff',
+  section: {},
+  sectionTitle: {
+    fontSize: 18,
+    fontWeight: '800',
+    color: '#0f172a',
+    marginBottom: 12,
+  },
+  description: {
+    fontSize: 15,
+    lineHeight: 24,
+    color: '#475569',
   },
 });

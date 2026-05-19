@@ -1,5 +1,6 @@
-import { Redirect, Tabs } from 'expo-router';
+import { Redirect, Tabs, router } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
+import { Pressable } from 'react-native';
 
 import { useAuthStore } from '@/store';
 
@@ -35,7 +36,7 @@ export default function AppLayout() {
         options={{
           title: 'Home',
           tabBarLabel: 'Home',
-          headerShown: false,
+          headerShown: true,
           tabBarIcon: ({ color, size }) => (
             <Ionicons color={color} name="home-outline" size={size} />
           ),
@@ -46,7 +47,7 @@ export default function AppLayout() {
         options={{
           title: 'Bookmarks',
           tabBarLabel: 'Bookmarks',
-          headerShown: false,
+          headerShown: true,
           tabBarIcon: ({ color, size }) => (
             <Ionicons color={color} name="bookmark-outline" size={size} />
           ),
@@ -57,7 +58,7 @@ export default function AppLayout() {
         options={{
           title: 'Profile',
           tabBarLabel: 'Profile',
-          headerShown: false,
+          headerShown: true,
           tabBarIcon: ({ color, size }) => (
             <Ionicons color={color} name="person-outline" size={size} />
           ),
@@ -68,6 +69,11 @@ export default function AppLayout() {
         options={{
           href: null,
           headerTitle: 'Course Details',
+          headerLeft: () => (
+            <Pressable onPress={() => router.back()} style={{ marginLeft: 16, padding: 4 }}>
+              <Ionicons color="#0f172a" name="arrow-back" size={24} />
+            </Pressable>
+          ),
         }}
       />
       <Tabs.Screen
@@ -75,6 +81,11 @@ export default function AppLayout() {
         options={{
           href: null,
           headerTitle: 'Course Content',
+          headerLeft: () => (
+            <Pressable onPress={() => router.back()} style={{ marginLeft: 16, padding: 4 }}>
+              <Ionicons color="#0f172a" name="arrow-back" size={24} />
+            </Pressable>
+          ),
         }}
       />
     </Tabs>

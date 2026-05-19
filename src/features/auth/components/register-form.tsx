@@ -1,3 +1,4 @@
+import { useState } from 'react';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useForm } from 'react-hook-form';
 import {
@@ -7,6 +8,7 @@ import {
   TextInput,
   View,
 } from 'react-native';
+import { Ionicons } from '@expo/vector-icons';
 
 import {
   registerSchema,
@@ -24,6 +26,9 @@ export function RegisterForm({
   serverError,
   onSubmit,
 }: RegisterFormProps) {
+  const [showPassword, setShowPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+
   const {
     handleSubmit,
     setValue,
@@ -49,20 +54,23 @@ export function RegisterForm({
     <View style={styles.container}>
       <View style={styles.field}>
         <Text style={styles.label}>Full Name</Text>
-        <TextInput
-          autoCapitalize="words"
-          autoComplete="name"
-          onChangeText={(text) =>
-            setValue('fullName', text, {
-              shouldDirty: true,
-              shouldValidate: true,
-            })
-          }
-          placeholder="Your full name"
-          placeholderTextColor="#94a3b8"
-          style={styles.input}
-          value={values.fullName}
-        />
+        <View style={styles.inputWrap}>
+          <Ionicons name="person-outline" size={20} color="#94a3b8" style={styles.inputIcon} />
+          <TextInput
+            autoCapitalize="words"
+            autoComplete="name"
+            onChangeText={(text) =>
+              setValue('fullName', text, {
+                shouldDirty: true,
+                shouldValidate: true,
+              })
+            }
+            placeholder="Your full name"
+            placeholderTextColor="#94a3b8"
+            style={styles.input}
+            value={values.fullName}
+          />
+        </View>
         {errors.fullName ? (
           <Text style={styles.error}>{errors.fullName.message}</Text>
         ) : null}
@@ -70,38 +78,47 @@ export function RegisterForm({
 
       <View style={styles.field}>
         <Text style={styles.label}>Email</Text>
-        <TextInput
-          autoCapitalize="none"
-          autoComplete="email"
-          keyboardType="email-address"
-          onChangeText={(text) =>
-            setValue('email', text, { shouldDirty: true, shouldValidate: true })
-          }
-          placeholder="you@example.com"
-          placeholderTextColor="#94a3b8"
-          style={styles.input}
-          value={values.email}
-        />
+        <View style={styles.inputWrap}>
+          <Ionicons name="mail-outline" size={20} color="#94a3b8" style={styles.inputIcon} />
+          <TextInput
+            autoCapitalize="none"
+            autoComplete="email"
+            keyboardType="email-address"
+            onChangeText={(text) =>
+              setValue('email', text, { shouldDirty: true, shouldValidate: true })
+            }
+            placeholder="you@example.com"
+            placeholderTextColor="#94a3b8"
+            style={styles.input}
+            value={values.email}
+          />
+        </View>
         {errors.email ? <Text style={styles.error}>{errors.email.message}</Text> : null}
       </View>
 
       <View style={styles.field}>
         <Text style={styles.label}>Password</Text>
-        <TextInput
-          autoCapitalize="none"
-          autoComplete="new-password"
-          onChangeText={(text) =>
-            setValue('password', text, {
-              shouldDirty: true,
-              shouldValidate: true,
-            })
-          }
-          placeholder="Create a password"
-          placeholderTextColor="#94a3b8"
-          secureTextEntry
-          style={styles.input}
-          value={values.password}
-        />
+        <View style={styles.inputWrap}>
+          <Ionicons name="lock-closed-outline" size={20} color="#94a3b8" style={styles.inputIcon} />
+          <TextInput
+            autoCapitalize="none"
+            autoComplete="new-password"
+            onChangeText={(text) =>
+              setValue('password', text, {
+                shouldDirty: true,
+                shouldValidate: true,
+              })
+            }
+            placeholder="Create a password"
+            placeholderTextColor="#94a3b8"
+            secureTextEntry={!showPassword}
+            style={styles.input}
+            value={values.password}
+          />
+          <Pressable onPress={() => setShowPassword(!showPassword)} style={styles.eyeIcon}>
+            <Ionicons name={showPassword ? "eye-off-outline" : "eye-outline"} size={20} color="#94a3b8" />
+          </Pressable>
+        </View>
         {errors.password ? (
           <Text style={styles.error}>{errors.password.message}</Text>
         ) : null}
@@ -109,21 +126,27 @@ export function RegisterForm({
 
       <View style={styles.field}>
         <Text style={styles.label}>Confirm Password</Text>
-        <TextInput
-          autoCapitalize="none"
-          autoComplete="new-password"
-          onChangeText={(text) =>
-            setValue('confirmPassword', text, {
-              shouldDirty: true,
-              shouldValidate: true,
-            })
-          }
-          placeholder="Confirm your password"
-          placeholderTextColor="#94a3b8"
-          secureTextEntry
-          style={styles.input}
-          value={values.confirmPassword}
-        />
+        <View style={styles.inputWrap}>
+          <Ionicons name="shield-checkmark-outline" size={20} color="#94a3b8" style={styles.inputIcon} />
+          <TextInput
+            autoCapitalize="none"
+            autoComplete="new-password"
+            onChangeText={(text) =>
+              setValue('confirmPassword', text, {
+                shouldDirty: true,
+                shouldValidate: true,
+              })
+            }
+            placeholder="Confirm your password"
+            placeholderTextColor="#94a3b8"
+            secureTextEntry={!showConfirmPassword}
+            style={styles.input}
+            value={values.confirmPassword}
+          />
+          <Pressable onPress={() => setShowConfirmPassword(!showConfirmPassword)} style={styles.eyeIcon}>
+            <Ionicons name={showConfirmPassword ? "eye-off-outline" : "eye-outline"} size={20} color="#94a3b8" />
+          </Pressable>
+        </View>
         {errors.confirmPassword ? (
           <Text style={styles.error}>{errors.confirmPassword.message}</Text>
         ) : null}
@@ -146,45 +169,68 @@ export function RegisterForm({
 
 const styles = StyleSheet.create({
   container: {
-    gap: 18,
+    gap: 20,
   },
   field: {
     gap: 8,
   },
   label: {
     fontSize: 14,
-    fontWeight: '600',
-    color: '#0f172a',
+    fontWeight: '700',
+    color: '#334155',
+    marginLeft: 4,
   },
-  input: {
-    minHeight: 52,
+  inputWrap: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    height: 54,
     borderWidth: 1,
     borderColor: '#cbd5e1',
     borderRadius: 16,
-    paddingHorizontal: 16,
+    backgroundColor: '#f8fafc',
+  },
+  inputIcon: {
+    paddingLeft: 16,
+    paddingRight: 8,
+  },
+  eyeIcon: {
+    paddingRight: 16,
+    paddingLeft: 8,
+    justifyContent: 'center',
+    alignItems: 'center',
+    height: 54,
+  },
+  input: {
+    flex: 1,
+    height: 54,
+    paddingRight: 16,
     fontSize: 15,
     color: '#0f172a',
-    backgroundColor: '#f8fafc',
   },
   error: {
     fontSize: 13,
-    color: '#dc2626',
+    color: '#ef4444',
+    marginLeft: 4,
   },
   button: {
-    minHeight: 54,
+    minHeight: 56,
     borderRadius: 16,
     alignItems: 'center',
     justifyContent: 'center',
-    backgroundColor: '#0f172a',
+    backgroundColor: '#2563eb',
+    marginTop: 8,
+    shadowColor: '#2563eb',
+    shadowOffset: { width: 0, height: 6 },
+    shadowOpacity: 0.3,
+    shadowRadius: 12,
+    elevation: 6,
   },
   buttonText: {
-    fontSize: 15,
+    fontSize: 16,
     fontWeight: '700',
     color: '#ffffff',
   },
   helper: {
-    fontSize: 13,
-    lineHeight: 20,
-    color: '#64748b',
+    display: 'none',
   },
 });

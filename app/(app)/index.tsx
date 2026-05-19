@@ -4,7 +4,6 @@ import { Redirect, router } from 'expo-router';
 import { StyleSheet, View } from 'react-native';
 
 import { EmptyState, ScreenLoader } from '@/components/feedback';
-import { AppScreen } from '@/components/layout/app-screen';
 import { CourseCatalogList } from '@/features/courses/components';
 import { useCourseCatalog } from '@/features/courses/hooks';
 import { useAppStore, useAuthStore } from '@/store';
@@ -34,40 +33,39 @@ export default function AppHomeScreen() {
   }
 
   return (
-    <AppScreen
-      description=""
-      eyebrow="Catalog"
-      scrollEnabled={false}
-      title="Course Cataloge"
-    >
+    <View style={styles.container}>
       {courseCatalogQuery.isPending ? (
         <ScreenLoader message="Loading course catalog..." />
       ) : null}
       {courseCatalogQuery.isError ? (
-        <EmptyState
-          title="Unable to load courses"
-          description="We could not fetch the catalog right now. Pull to refresh support is coming next."
-        />
-      ) : null}
-      {courseCatalogQuery.data ? (
-        <View style={styles.catalogWrap}>
-          <CourseCatalogList
-            bookmarkedCourseIds={bookmarkedCourseIds}
-            courses={courseCatalogQuery.data}
-            isRefreshing={courseCatalogQuery.isRefetching}
-            onPressCourse={handlePressCourse}
-            onRefresh={handleRefresh}
-            onToggleBookmark={toggleBookmark}
+        <View style={styles.errorWrap}>
+          <EmptyState
+            title="Unable to load courses"
+            description="We could not fetch the catalog right now. Pull to refresh support is coming next."
           />
         </View>
       ) : null}
-    </AppScreen>
+      {courseCatalogQuery.data ? (
+        <CourseCatalogList
+          bookmarkedCourseIds={bookmarkedCourseIds}
+          courses={courseCatalogQuery.data}
+          isRefreshing={courseCatalogQuery.isRefetching}
+          onPressCourse={handlePressCourse}
+          onRefresh={handleRefresh}
+          onToggleBookmark={toggleBookmark}
+        />
+      ) : null}
+    </View>
   );
 }
 
 const styles = StyleSheet.create({
-  catalogWrap: {
+  container: {
     flex: 1,
-    minHeight: 500,
+    backgroundColor: '#f8fafc',
+  },
+  errorWrap: {
+    padding: 24,
+    marginTop: 24,
   },
 });
